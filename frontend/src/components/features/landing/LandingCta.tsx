@@ -29,7 +29,7 @@ export function LandingCta() {
               copy, visuals, and a review queue.
             </p>
             <Link
-              href="/campaigns/new"
+              href="/projects/new"
               className={cn(
                 "mt-8 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5",
                 "text-base font-medium text-white transition-colors duration-200 hover:bg-cyan-400",

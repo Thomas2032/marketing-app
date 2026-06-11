@@ -22,7 +22,7 @@ export function LandingFooter() {
         </p>
 
         <Link
-          href="/campaigns/new"
+          href="/projects/new"
           className="cursor-pointer text-sm font-medium text-violet-700 transition-colors duration-200 hover:text-cyan-600"
         >
           Create campaign →

@@ -3,19 +3,30 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Sparkles } from "lucide-react";
+import { CampaignChatbox } from "@/components/features/campaign/CampaignChatbox";
 import { createCampaign, runCampaign } from "@/lib/api";
-import { DEMO_USER_ID } from "@/lib/constants";
+import { getLoadingLabel } from "@/lib/campaign-mode";
+import { DEMO_USER_ID, USE_BACKEND } from "@/lib/constants";
+import { createInitialMockCampaign, saveMockCampaign } from "@/lib/mock-campaign";
+import type { TaskType } from "@/types/campaign";
+import { taskTypes } from "@/types/campaign";
 import { ContextCard } from "@/components/features/campaign/ConversationMessages";
 import { TypingIndicator } from "@/components/features/campaign/TypingIndicator";
 import { cn } from "@/lib/utils";
 
-const suggestions = [
-  "Summer product launch for a SaaS tool",
-  "LinkedIn thought leadership series",
-  "Re-engagement campaign for churned users",
-];
+const taskPlaceholders: Record<TaskType, string> = {
+  Brainstorm: "Share your product, audience, and goals — we'll explore angles and ideas…",
+  Copywriting: "Describe what you want to say, the platform, and your tone…",
+  "Visual Asset": "Describe the visual you need — style, subject, and where it'll be used…",
+};
 
-export function CampaignForm() {
+const defaultPlaceholder = "Describe your campaign in detail";
+
+type CampaignFormProps = {
+  projectId: string;
+};
+
+export function CampaignForm({ projectId }: CampaignFormProps) {
   const router = useRouter();
   const [brief, setBrief] = useState("");
   const [showRefine, setShowRefine] = useState(false);
@@ -24,6 +35,7 @@ export function CampaignForm() {
   const [targetAudience, setTargetAudience] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [taskType, setTaskType] = useState<TaskType | null>(null);
 
   const hasBrief = brief.trim().length > 0;
 
@@ -34,6 +46,23 @@ export function CampaignForm() {
 
     const resolvedTitle =
       title.trim() || brief.trim().split(/[.!?\n]/)[0]?.slice(0, 80) || "Untitled campaign";
+
+    if (!USE_BACKEND) {
+      const mockCampaign = createInitialMockCampaign({
+        projectId,
+        title: resolvedTitle,
+        brief,
+        brandVoice: brandVoice.trim() || undefined,
+        targetAudience: targetAudience.trim() || undefined,
+        taskType,
+      });
+      saveMockCampaign(mockCampaign);
+
+      await new Promise((resolve) => window.setTimeout(resolve, 1200));
+      setLoading(false);
+      router.push(`/campaigns/${mockCampaign.id}`);
+      return;
+    }
 
     try {
       const campaign = await createCampaign({
@@ -53,7 +82,7 @@ export function CampaignForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+    <form id="campaign-form" onSubmit={handleSubmit} className="flex flex-1 flex-col">
       <div className="mb-8">
         <p className="mb-3 flex items-center gap-2 text-sm text-slate-600">
           <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
@@ -64,43 +93,53 @@ export function CampaignForm() {
         </h1>
       </div>
 
-      <ContextCard title="Your brief">
-        <label htmlFor="brief" className="sr-only">
-          Campaign brief
-        </label>
-        <textarea
-          id="brief"
-          required
-          rows={6}
-          value={brief}
-          onChange={(e) => setBrief(e.target.value)}
-          placeholder="Paste a URL, drop your idea, or tell me about the product, audience, and goal…"
-          className={cn(
-            "mt-1 w-full resize-none bg-transparent text-base leading-relaxed text-slate-800",
-            "placeholder:text-slate-400 outline-none",
-          )}
-        />
-      </ContextCard>
-
-      {!hasBrief && (
-        <div className="mt-5 flex flex-wrap gap-2">
-          {suggestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => setBrief(suggestion)}
-              className={cn(
-                "cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2",
-                "text-sm text-slate-600 transition-colors duration-200",
-                "hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/30",
-              )}
-            >
-              {suggestion}
-            </button>
-          ))}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity,margin-bottom] duration-300 ease-in-out",
+          taskType ? "mb-0 grid-rows-[0fr] opacity-0" : "mb-5 grid-rows-[1fr] opacity-100",
+        )}
+      >
+        <div className="overflow-hidden">
+          <div
+            className={cn(
+              "flex flex-wrap gap-2 transition-transform duration-300 ease-in-out",
+              taskType ? "-translate-y-1" : "translate-y-0",
+            )}
+          >
+            {taskTypes.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setTaskType(type)}
+                tabIndex={taskType ? -1 : 0}
+                className={cn(
+                  "cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600",
+                  "transition-colors duration-200 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/30",
+                )}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
+
+      <CampaignChatbox
+        value={brief}
+        onChange={setBrief}
+        onSubmit={() => {
+          const form = document.getElementById("campaign-form") as HTMLFormElement | null;
+          form?.requestSubmit();
+        }}
+        disabled={loading || !projectId}
+        inputId="brief"
+        inputLabel="Campaign brief"
+        submitLabel="Generate campaign"
+        taskType={taskType}
+        onClearTaskType={() => setTaskType(null)}
+        placeholder={taskType ? taskPlaceholders[taskType] : defaultPlaceholder}
+      />
 
       <div className="mt-6">
         <button
@@ -166,39 +205,25 @@ export function CampaignForm() {
 
       {loading && (
         <div className="mt-8">
-          <AiMessageStub>
-            <TypingIndicator label="Starting extractor, writer, image, and reviewer agents…" />
+          <AiMessageStub agent="Orchestrator">
+            <TypingIndicator label={getLoadingLabel(taskType)} />
           </AiMessageStub>
         </div>
       )}
 
-      <div
-        className={cn(
-          "sticky bottom-0 mt-auto bg-gradient-to-t from-[#FAF5FF] via-[#FAF5FF] to-transparent pt-6 pb-2",
-          hasBrief && !loading ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      >
-        <button
-          type="submit"
-          disabled={loading || !hasBrief}
-          className={cn(
-            "w-full cursor-pointer rounded-2xl bg-cyan-500 px-6 py-4 text-base font-medium text-white",
-            "transition-colors duration-200 hover:bg-cyan-600",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/40 focus-visible:ring-offset-2",
-          )}
-        >
-          Generate campaign
-        </button>
-      </div>
     </form>
   );
 }
 
-function AiMessageStub({ children }: { children: React.ReactNode }) {
+type AiMessageStubProps = {
+  agent: string;
+  children: React.ReactNode;
+};
+
+function AiMessageStub({ agent, children }: AiMessageStubProps) {
   return (
     <article className="flex flex-col gap-2">
-      <p className="text-xs font-medium text-violet-700">Orchestrator</p>
+      <p className="text-xs font-medium text-violet-700">{agent}</p>
       <div className="rounded-2xl rounded-bl-md border border-violet-200/80 border-l-4 border-l-violet-600 bg-white px-4 py-3 shadow-sm">
         {children}
       </div>

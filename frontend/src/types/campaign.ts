@@ -1,3 +1,33 @@
+export const taskTypes = ["Brainstorm", "Copywriting", "Visual Asset"] as const;
+export type TaskType = (typeof taskTypes)[number];
+
+export const agentToolNames = [
+  "quality_gate",
+  "extract_brief",
+  "brainstorm_angles",
+  "write_copy",
+  "generate_visual",
+  "review_outputs",
+] as const;
+export type AgentToolName = (typeof agentToolNames)[number];
+
+export type ToolCallStatus = "running" | "completed" | "failed";
+
+export interface ToolCall {
+  tool_run_id: string;
+  tool: AgentToolName;
+  status: ToolCallStatus;
+  output_ref?: string | null;
+  started_at: string;
+  completed_at?: string | null;
+}
+
+export interface CampaignMessage {
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
 export type CampaignStatus =
   | "draft"
   | "queued"
@@ -18,6 +48,7 @@ export interface CampaignOutput {
 export interface Campaign {
   id: string;
   user_id: string;
+  project_id?: string | null;
   title: string;
   brief: string;
   status: CampaignStatus;
@@ -38,8 +69,10 @@ export interface CreateCampaignPayload {
 
 export interface CampaignSummary {
   id: string;
+  project_id?: string | null;
   title: string;
   status: CampaignStatus;
+  task_type?: TaskType | null;
   created_at: string;
   updated_at: string;
 }

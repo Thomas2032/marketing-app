@@ -41,7 +41,7 @@ export function LandingHero() {
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="/campaigns/new"
+                href="/projects/new"
                 className={cn(
                   "inline-flex cursor-pointer items-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5",
                   "text-base font-medium text-white transition-colors duration-200 hover:bg-cyan-600",

@@ -54,7 +54,7 @@ export function LandingNavbar({ className }: LandingNavbarProps) {
         </div>
 
         <Link
-          href="/campaigns/new"
+          href="/projects/new"
           className={cn(
             "cursor-pointer rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white",
             "transition-colors duration-200 hover:bg-cyan-600",

@@ -1,10 +1,5 @@
-import { CampaignForm } from "@/components/CampaignForm";
-import { CampaignShell } from "@/components/features/campaign/CampaignShell";
+import { redirect } from "next/navigation";
 
 export default function NewCampaignPage() {
-  return (
-    <CampaignShell backHref="/" backLabel="← Home">
-      <CampaignForm />
-    </CampaignShell>
-  );
+  redirect("/projects/new");
 }
