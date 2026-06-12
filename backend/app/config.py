@@ -12,15 +12,17 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     cors_origins: list[str] = ["http://localhost:3000"]
 
-    # LLM
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    # LLM — unified keys, provider declares which protocol to use
+    llm_provider: str = "openai"   # openai | anthropic | gemini
+    llm_api_key: str = ""
+    llm_model: str = "gpt-4o-mini"
+    llm_api_base: str | None = None  # e.g. https://www.deeprouter.top
 
     # PostgreSQL
     database_url: str = "postgresql+asyncpg://marketing:marketing@localhost:5432/marketing"
 
     # Object storage (S3 / R2)
-    storage_endpoint_url: str | None = None  # Set for R2; leave None for AWS S3
+    storage_endpoint_url: str | None = None
     storage_bucket: str = "marketing-assets"
     storage_access_key: str = ""
     storage_secret_key: str = ""
