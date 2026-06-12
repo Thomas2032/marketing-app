@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing App Developer Portal - Overview</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-indigo-950 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white py-6 px-8 border-b border-violet-800 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500 text-sm font-bold text-white shadow-md">M</span>
+                    <h1 class="text-2xl font-bold tracking-tight">Marketing App</h1>
+                </div>
+                <p class="text-slate-300 text-xs mt-1">Developer Portal & Onboarding Suite</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">Next.js 16</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">FastAPI</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">LangGraph</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">PostgreSQL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Navigation Panel (Sidebar) -->
+        <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-2">Navigation</h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="index.html" class="nav-link-active w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 transition-all block">
+                        1. System Overview
+                    </a>
+                    <a href="architecture.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        2. Architecture & LangGraph
+                    </a>
+                    <a href="database.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        3. Database Schema
+                    </a>
+                    <a href="api.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        4. API Route Trace
+                    </a>
+                    <a href="frontend.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        5. Frontend & Features
+                    </a>
+                    <a href="simulator.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        6. Sandbox Simulator
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Access Links -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">Critical Files</h3>
+                <ul class="text-xs space-y-2 font-mono text-slate-600">
+                    <li class="truncate" title="backend/app/db/models.py">📁 <span class="font-semibold">models.py</span></li>
+                    <li class="truncate" title="backend/app/agents/orchestrator.py">📁 <span class="font-semibold">orchestrator.py</span></li>
+                    <li class="truncate" title="backend/app/services/campaign_state_helper.py">📁 <span class="font-semibold">state_helper.py</span></li>
+                    <li class="truncate" title="backend/app/api/routes/campaigns.py">📁 <span class="font-semibold">routes/campaigns.py</span></li>
+                    <li class="truncate" title="frontend/src/lib/constants.ts">📁 <span class="font-semibold">constants.ts</span></li>
+                    <li class="truncate" title="frontend/src/components/CampaignResults.tsx">📁 <span class="font-semibold">CampaignResults.tsx</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-w-0 animate-fade-in">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">1. System Overview</h2>
+                <p class="text-sm text-slate-500 mt-1">High-level understanding of the codebase structure, execution models, and technology stack.</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Tech Stack Summary -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 hover:border-violet-300 transition-colors">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="p-1.5 rounded bg-violet-100 text-violet-700 text-xs font-bold font-mono">FE</span>
+                            <h4 class="font-bold text-sm text-indigo-900">Next.js 16 Frontend</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Responsible for displaying the campaigns catalog, interactive creation forms, and rendering real-time sub-agent runs via a recursive polling loop. Includes offline mock mode simulation.</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 hover:border-violet-300 transition-colors">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="p-1.5 rounded bg-emerald-100 text-emerald-700 text-xs font-bold font-mono">API</span>
+                            <h4 class="font-bold text-sm text-indigo-900">FastAPI API Layer</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Validates payloads, manages database sessions, triggers background tasks or queues via Redis, and serves campaign state increments to frontend clients.</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 hover:border-violet-300 transition-colors">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="p-1.5 rounded bg-amber-100 text-amber-700 text-xs font-bold font-mono">AG</span>
+                            <h4 class="font-bold text-sm text-indigo-900">LangGraph Agent Loop</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Executes the campaign generation workflow. Combines individual sub-agent nodes (extract, write, generate image, review) and persists state progress incrementally to the DB.</p>
+                    </div>
+                </div>
+
+                <!-- Principles and Design Philosophy -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-3">Core Design Principles</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border border-slate-100 p-4 rounded-xl shadow-xs">
+                            <h5 class="text-xs font-bold uppercase tracking-wider text-violet-600 mb-1">Agent-as-a-Tool</h5>
+                            <p class="text-xs text-slate-600 leading-relaxed">One Orchestrator handles every user turn. Specialist capabilities (writing, image generation, extraction, review) are exposed as tools the orchestrator calls dynamically rather than a rigid static pipeline.</p>
+                        </div>
+                        <div class="border border-slate-100 p-4 rounded-xl shadow-xs">
+                            <h5 class="text-xs font-bold uppercase tracking-wider text-violet-600 mb-1">Continuous Conversation</h5>
+                            <p class="text-xs text-slate-600 leading-relaxed">Follow-up chat messages append to the campaign message history and trigger a rerun of the orchestrator. Nodes dynamically digest prior chat history to modify outputs.</p>
+                        </div>
+                        <div class="border border-slate-100 p-4 rounded-xl shadow-xs">
+                            <h5 class="text-xs font-bold uppercase tracking-wider text-violet-600 mb-1">Incremental State Commits</h5>
+                            <p class="text-xs text-slate-600 leading-relaxed">Instead of committing database updates only at the end of a long-running graph, nodes commit status updates and outputs mid-run. This enables immediate feedback in the UI.</p>
+                        </div>
+                        <div class="border border-slate-100 p-4 rounded-xl shadow-xs">
+                            <h5 class="text-xs font-bold uppercase tracking-wider text-violet-600 mb-1">Optimistic UI & Polling</h5>
+                            <p class="text-xs text-slate-600 leading-relaxed">The frontend performs optimistic updates on messages and starts a 3000ms recursive polling loop to fetch incremental updates, ensuring a fluid user experience.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Directory Map -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-3">Project Directory Map</h3>
+                    <div class="bg-slate-900 rounded-xl p-6 text-slate-300 font-mono text-xs overflow-x-auto shadow-inner">
+                        <pre>
+marketing-app/
+├── backend/                        <span class="text-emerald-400"># FastAPI Backend Application</span>
+│   ├── app/
+│   │   ├── agents/                 <span class="text-slate-500"># LangGraph Orchestrator & Specialized Nodes</span>
+│   │   │   ├── nodes/              <span class="text-slate-500"># extractor.py, writer.py, image.py, reviewer.py</span>
+│   │   │   ├── state.py            <span class="text-slate-500"># TypedDict defining CampaignGraphState</span>
+│   │   │   └── orchestrator.py     <span class="text-slate-500"># Compiling StateGraph and edge mappings</span>
+│   │   ├── api/                    <span class="text-slate-500"># REST controllers and routers</span>
+│   │   ├── db/                     <span class="text-slate-500"># SQLAlchemy Models and Session setup</span>
+│   │   ├── schemas/                <span class="text-slate-500"># Pydantic schemas for data validation</span>
+│   │   └── services/               <span class="text-slate-500"># queue.py, storage.py, campaign_state_helper.py</span>
+│   └── requirements.txt            <span class="text-slate-500"># Python dependencies (arq, langgraph, sqlmodel...)</span>
+│
+├── frontend/                       <span class="text-violet-400"># Next.js 16 Frontend (React, TS, Tailwind)</span>
+│   ├── src/
+│   │   ├── app/                    <span class="text-slate-500"># App router: /campaigns, /projects</span>
+│   │   ├── components/             <span class="text-slate-500"># Shared and feature components</span>
+│   │   │   └── features/           <span class="text-slate-500"># Project dashboards, visual-editor, publish wizard</span>
+│   │   ├── lib/                    <span class="text-slate-500"># api.ts, constants.ts, campaign-state.ts</span>
+│   │   └── types/                  <span class="text-slate-500"># Campaign, Project, and Publish interfaces</span>
+│   └── package.json                <span class="text-slate-500"># React 19, tailwindcss v4, typescript dependencies</span>
+│
+└── docker-compose.yml              <span class="text-slate-400"># Services: PostgreSQL & Redis</span></pre>
+                    </div>
+                </div>
+
+                <!-- Setup Guide -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Quick Start & Execution Guide</h3>
+                    <p class="text-xs text-slate-500 mb-3">Follow these commands to configure the development stack locally.</p>
+                    <div class="bg-slate-950 text-slate-300 rounded-lg p-5 font-mono text-xs space-y-4 shadow-inner">
+                        <div>
+                            <span class="text-slate-500"># 1. Spin up PostgreSQL and Redis Infrastructure</span>
+                            <p class="text-violet-400">docker compose up -d postgres redis</p>
+                        </div>
+
+                        <div>
+                            <span class="text-slate-500"># 2. Configure and Run Backend (FastAPI on Port 8000)</span>
+                            <p class="text-slate-300">cd backend && cp .env.example .env
+<span class="text-slate-500"># (Optional) Edit .env to add OPENAI_API_KEY and AWS/Cloudflare storage keys</span>
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000</p>
+                        </div>
+
+                        <div>
+                            <span class="text-slate-500"># 3. Configure and Run Frontend (Next.js on Port 3000)</span>
+                            <p class="text-slate-300">cd frontend && cp ../.env.example .env.local
+<span class="text-slate-500"># Set NEXT_PUBLIC_USE_BACKEND=true (Default: true) to bypass mock mode</span>
+npm install
+npm run dev</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-500 py-6 px-8 text-center text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Marketing App - Developer Portal. Built for local offline deployment.</p>
+            <div class="flex gap-4">
+                <a href="../README.md" class="hover:text-slate-300">Project README</a>
+                <a href="../backend/README.md" class="hover:text-slate-300">Backend Guide</a>
+                <a href="../frontend/README.md" class="hover:text-slate-300">Frontend Guide</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

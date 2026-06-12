@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing App 開發者門戶 - 資料庫 Schema</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-indigo-950 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white py-6 px-8 border-b border-violet-800 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500 text-sm font-bold text-white shadow-md">M</span>
+                    <h1 class="text-2xl font-bold tracking-tight">Marketing App</h1>
+                </div>
+                <p class="text-slate-300 text-xs mt-1">開發者門戶與架構導航 (Developer Portal)</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">Next.js 16</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">FastAPI</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">LangGraph</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">PostgreSQL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Navigation Panel (Sidebar) -->
+        <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-2">導航 (Navigation)</h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="index.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        1. 系統概述 (Overview)
+                    </a>
+                    <a href="architecture.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        2. 架構與 LangGraph 流程
+                    </a>
+                    <a href="database.html" class="nav-link-active w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 transition-all block">
+                        3. 資料庫 Schema
+                    </a>
+                    <a href="api.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        4. API 路由追蹤 (Trace)
+                    </a>
+                    <a href="frontend.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        5. 前端架構與功能
+                    </a>
+                    <a href="simulator.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        6. 狀態沙盒模擬器 (Simulator)
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Access Links -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">關鍵檔案</h3>
+                <ul class="text-xs space-y-2 font-mono text-slate-600">
+                    <li class="truncate" title="backend/app/db/models.py">📁 <span class="font-semibold">models.py</span></li>
+                    <li class="truncate" title="backend/app/agents/orchestrator.py">📁 <span class="font-semibold">orchestrator.py</span></li>
+                    <li class="truncate" title="backend/app/services/campaign_state_helper.py">📁 <span class="font-semibold">state_helper.py</span></li>
+                    <li class="truncate" title="backend/app/api/routes/campaigns.py">📁 <span class="font-semibold">routes/campaigns.py</span></li>
+                    <li class="truncate" title="frontend/src/lib/constants.ts">📁 <span class="font-semibold">constants.ts</span></li>
+                    <li class="truncate" title="frontend/src/components/CampaignResults.tsx">📁 <span class="font-semibold">CampaignResults.tsx</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-w-0 animate-fade-in">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">3. 資料庫 Schema (Database Schema)</h2>
+                <p class="text-sm text-slate-500 mt-1">行銷企劃的資料持久層結構。將滑鼠懸停於外鍵 (Foreign Key) 上，可觀察表與表之間的聯動關係。</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Tables Grid -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                    <!-- user_configs Table -->
+                    <div id="table-user-configs" class="schema-card bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <span class="font-bold text-sm text-slate-800">user_configs</span>
+                            <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-mono">設定表</span>
+                        </div>
+                        <div class="p-4 space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5 font-semibold">
+                                <span class="text-violet-600 font-mono">id (PK)</span>
+                                <span class="text-slate-400 font-mono">UUID</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono font-medium">user_id (Unique)</span>
+                                <span class="text-slate-400 font-mono">VARCHAR(128)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">brand_voice</span>
+                                <span class="text-slate-400 font-mono">TEXT</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">target_audience</span>
+                                <span class="text-slate-400 font-mono">TEXT</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono">preferences</span>
+                                <span class="text-slate-400 font-mono">JSONB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- campaigns Table -->
+                    <div id="table-campaigns" class="schema-card bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-indigo-900 text-white px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <span class="font-bold text-sm">campaigns</span>
+                            <span class="text-[10px] bg-indigo-950 px-2 py-0.5 rounded text-slate-300 font-mono">企劃主表</span>
+                        </div>
+                        <div class="p-4 space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center border-b border-indigo-50/10 pb-1.5 font-semibold">
+                                <span class="text-violet-400 font-mono">id (PK)</span>
+                                <span class="text-slate-300 font-mono">UUID</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono font-medium">user_id (Index)</span>
+                                <span class="text-slate-400 font-mono">VARCHAR(128)</span>
+                            </div>
+                            <!-- FK Hover element -->
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5 cursor-help bg-violet-50/50 p-1 rounded transition-colors" data-relates-to="table-user-configs" title="關聯至 user_configs.id">
+                                <span class="text-violet-600 font-mono font-semibold">user_config_id (FK) 🔗</span>
+                                <span class="text-slate-400 font-mono">UUID</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">title</span>
+                                <span class="text-slate-400 font-mono">VARCHAR(256)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">brief</span>
+                                <span class="text-slate-400 font-mono">TEXT</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">status</span>
+                                <span class="text-slate-400 font-mono">Enum (status)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono font-medium text-indigo-900">state</span>
+                                <span class="text-slate-400 font-mono">JSONB (核心日誌)</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono">error_message</span>
+                                <span class="text-slate-400 font-mono">TEXT</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- campaign_outputs Table -->
+                    <div id="table-campaign-outputs" class="schema-card bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <span class="font-bold text-sm text-slate-800">campaign_outputs</span>
+                            <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-mono">生成產物表</span>
+                        </div>
+                        <div class="p-4 space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5 font-semibold">
+                                <span class="text-violet-600 font-mono">id (PK)</span>
+                                <span class="text-slate-400 font-mono">UUID</span>
+                            </div>
+                            <!-- FK Hover element -->
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5 cursor-help bg-violet-50/50 p-1 rounded transition-colors" data-relates-to="table-campaigns" title="關聯至 campaigns.id (CASCADE 級聯刪除)">
+                                <span class="text-violet-600 font-mono font-semibold">campaign_id (FK) 🔗</span>
+                                <span class="text-slate-400 font-mono">UUID</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">output_type</span>
+                                <span class="text-slate-400 font-mono">VARCHAR(64)</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">content</span>
+                                <span class="text-slate-400 font-mono">TEXT</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+                                <span class="font-mono">asset_url</span>
+                                <span class="text-slate-400 font-mono">VARCHAR(1024)</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono">metadata_</span>
+                                <span class="text-slate-400 font-mono">JSONB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ER Relations Description -->
+                <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl text-xs space-y-3">
+                    <h4 class="font-bold text-indigo-950">關聯設計與級聯刪除 (Cascading Delete Invariants)</h4>
+                    <p class="text-slate-600 leading-relaxed">
+                        1. **<code>campaigns ➔ user_configs</code> (多對一)**: `campaigns` 表的 `user_config_id` 是個可空外鍵 (Nullable Foreign Key)。如果用戶刪除了他的品牌預設設定，該企劃仍會保留，只是讀取默認品牌設定時會退回為系統預設值（例如 brand_voice: "professional", target_audience: "general"）。
+                    </p>
+                    <p class="text-slate-600 leading-relaxed">
+                        2. **<code>campaign_outputs ➔ campaigns</code> (一對多)**: 每個企劃生成的文案、提取出的 JSON brief、DALL-E 繪圖產物均存放在 `campaign_outputs` 表中。此關聯在定義時配置了 **`ondelete="CASCADE"`** (SQLAlchemy: `cascade="all, delete-orphan"`)。當刪除一個 campaign 時，資料庫會自動連帶清空旗下所有產生的文案與資產，避免垃圾殘留。
+                    </p>
+                </div>
+
+                <!-- SQLAlchemy Models Code -->
+                <div>
+                    <h4 class="font-semibold text-sm text-slate-700 mb-2">SQLAlchemy 實體模型宣告 (models.py)</h4>
+                    <div class="rounded-xl overflow-hidden shadow-sm border border-slate-200 text-xs">
+                        <div class="code-header px-4 py-2 font-mono flex justify-between">
+                            <span>backend/app/db/models.py</span>
+                            <span class="text-slate-500">Python (SQLAlchemy 2.0)</span>
+                        </div>
+                        <div class="code-body p-4 font-mono overflow-x-auto max-h-96 leading-relaxed">
+<pre>import enum
+import uuid
+from datetime import datetime
+from sqlalchemy import Enum, ForeignKey, String, Text, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+class Base(DeclarativeBase):
+    pass
+
+class CampaignStatus(str, enum.Enum):
+    DRAFT = "draft"
+    QUEUED = "queued"
+    RUNNING = "running"
+    REVIEW = "review"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class UserConfig(Base):
+    __tablename__ = "user_configs"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    brand_voice: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_audience: Mapped[str | None] = mapped_column(Text, nullable=True)
+    preferences: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+    campaigns: Mapped[list["Campaign"]] = relationship(back_populates="user_config")
+
+class Campaign(Base):
+    __tablename__ = "campaigns"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    user_config_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("user_configs.id", ondelete="SET NULL"), nullable=True
+    )
+    title: Mapped[str] = mapped_column(String(256))
+    brief: Mapped[str] = mapped_column(Text)
+    status: Mapped[CampaignStatus] = mapped_column(
+        Enum(CampaignStatus), default=CampaignStatus.DRAFT, index=True
+    )
+    state: Mapped[dict] = mapped_column(JSONB, default=dict)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    user_config: Mapped[UserConfig | None] = relationship(back_populates="campaigns")
+    outputs: Mapped[list["CampaignOutput"]] = relationship(
+        back_populates="campaign", cascade="all, delete-orphan"
+    )
+
+class CampaignOutput(Base):
+    __tablename__ = "campaign_outputs"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    campaign_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("campaigns.id", ondelete="CASCADE"), index=True
+    )
+    output_type: Mapped[str] = mapped_column(String(64))  # 'extracted', 'copy', 'image', 'review'
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
+    asset_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(JSONB, name="metadata", default=dict)
+
+    campaign: Mapped[Campaign] = relationship(back_populates="outputs")</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-500 py-6 px-8 text-center text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Marketing App - Developer Portal. Built for local offline deployment.</p>
+            <div class="flex gap-4">
+                <a href="../README.md" class="hover:text-slate-300">Project README</a>
+                <a href="../backend/README.md" class="hover:text-slate-300">Backend Guide</a>
+                <a href="../frontend/README.md" class="hover:text-slate-300">Frontend Guide</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive JS scripts for Foreign Key hover links highlighting -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const relations = document.querySelectorAll('[data-relates-to]');
+            relations.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const targetId = el.dataset.relatesTo;
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        // Highlight target table card
+                        targetEl.classList.add('ring-4', 'ring-violet-500', 'scale-[1.02]', 'z-10');
+                        el.classList.add('bg-violet-100', 'text-violet-700');
+                    }
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    const targetId = el.dataset.relatesTo;
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        targetEl.classList.remove('ring-4', 'ring-violet-500', 'scale-[1.02]', 'z-10');
+                        el.classList.remove('bg-violet-100', 'text-violet-700');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

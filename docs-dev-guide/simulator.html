@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing App 開發者門戶 - 狀態沙盒模擬器</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-indigo-950 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white py-6 px-8 border-b border-violet-800 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500 text-sm font-bold text-white shadow-md">M</span>
+                    <h1 class="text-2xl font-bold tracking-tight">Marketing App</h1>
+                </div>
+                <p class="text-slate-300 text-xs mt-1">開發者門戶與架構導航 (Developer Portal)</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">Next.js 16</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">FastAPI</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">LangGraph</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">PostgreSQL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Navigation Panel (Sidebar) -->
+        <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-2">導航 (Navigation)</h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="index.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        1. 系統概述 (Overview)
+                    </a>
+                    <a href="architecture.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        2. 架構與 LangGraph 流程
+                    </a>
+                    <a href="database.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        3. 資料庫 Schema
+                    </a>
+                    <a href="api.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        4. API 路由追蹤 (Trace)
+                    </a>
+                    <a href="frontend.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        5. 前端架構與功能
+                    </a>
+                    <a href="simulator.html" class="nav-link-active w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 transition-all block">
+                        6. 狀態沙盒模擬器 (Simulator)
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Access Links -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">關鍵檔案</h3>
+                <ul class="text-xs space-y-2 font-mono text-slate-600">
+                    <li class="truncate" title="backend/app/db/models.py">📁 <span class="font-semibold">models.py</span></li>
+                    <li class="truncate" title="backend/app/agents/orchestrator.py">📁 <span class="font-semibold">orchestrator.py</span></li>
+                    <li class="truncate" title="backend/app/services/campaign_state_helper.py">📁 <span class="font-semibold">state_helper.py</span></li>
+                    <li class="truncate" title="backend/app/api/routes/campaigns.py">📁 <span class="font-semibold">routes/campaigns.py</span></li>
+                    <li class="truncate" title="frontend/src/lib/constants.ts">📁 <span class="font-semibold">constants.ts</span></li>
+                    <li class="truncate" title="frontend/src/components/CampaignResults.tsx">📁 <span class="font-semibold">CampaignResults.tsx</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-w-0 animate-fade-in">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">6. 狀態沙盒模擬器 (State Sandbox Simulator)</h2>
+                <p class="text-sm text-slate-500 mt-1">互動式沙盒：模擬實時 Client 端 API 請求、後台 LangGraph 執行，以及資料庫行與 JSONB 欄位的變動。</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Left Column: Controls and logs -->
+                <div class="lg:col-span-2 space-y-4">
+
+                    <!-- Actions Card -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="font-bold text-sm text-indigo-900 mb-3">觸發 API / Agent 事件 (Trigger Events)</h4>
+                        <div class="space-y-4 text-xs">
+                            <div>
+                                <label class="block text-slate-500 mb-1.5 font-semibold">企劃簡介輸入 (Campaign Brief Input)</label>
+                                <textarea id="sim-input-brief" rows="2" class="w-full p-2 border border-slate-300 rounded-lg outline-none focus:border-violet-500 text-xs">Summer product launch for our SaaS analytics tool. Target: growth marketers. Highlight 40% faster setup.</textarea>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="sim-btn-create" class="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50">1. POST /campaigns (建立企劃)</button>
+                                <button id="sim-btn-run" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50" disabled>2. POST /{id}/run (啟動 Graph)</button>
+                            </div>
+                            <div class="border-t border-slate-200 pt-3 flex gap-2">
+                                <input id="sim-txt-message" type="text" placeholder="輸入追問修正指令 (例如: 多加一點表情符號 emoji)..." class="flex-1 p-2 border border-slate-300 rounded-lg outline-none text-xs" disabled>
+                                <button id="sim-btn-send" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-2 rounded-lg transition-colors shadow-sm disabled:opacity-50" disabled>3. 送出對話修正</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Console Log -->
+                    <div class="bg-slate-900 rounded-xl p-4 text-slate-300 h-64 flex flex-col font-mono text-[10px] shadow-md">
+                        <h4 class="text-violet-400 font-bold uppercase tracking-wider mb-2 shrink-0">執行事件日誌控制台 (Event Log Console)</h4>
+                        <ul id="sim-log-list" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                            <li class="text-slate-500">系統閒置中。請修改企劃簡介並點擊「建立企劃」開始模擬。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right Column: Raw Campaign JSON -->
+                <div class="space-y-4">
+                    <div class="bg-slate-950 rounded-xl p-4 text-slate-300 flex flex-col h-full shadow-md">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2 shrink-0">
+                            <span class="text-xs font-bold text-violet-400 uppercase tracking-wide font-mono">企劃資料庫 Record 快照 (JSON)</span>
+                            <span id="sim-status-badge" class="px-2 py-0.5 text-[9px] font-semibold rounded-full bg-slate-800 text-slate-400 font-mono">UNCREATED</span>
+                        </div>
+                        <pre id="sim-state-json" class="flex-1 overflow-auto font-mono text-[9px] text-slate-300 max-h-[380px] leading-relaxed">{
+  "campaign": "None"
+}</pre>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Database Columns visualizer -->
+            <div class="mt-6 border-t border-slate-200 pt-6">
+                <h3 class="font-bold text-sm text-slate-800 mb-3">資料庫欄位即時視圖 (PostgreSQL Mock View)</h3>
+                <div class="space-y-4 text-xs">
+
+                    <!-- campaigns table mock row -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                        <div class="bg-indigo-950 text-white px-4 py-2 font-semibold flex justify-between">
+                            <span>Table: campaigns (行銷企劃資料表)</span>
+                            <span class="font-mono text-[10px]">SELECT id, title, status, state FROM campaigns;</span>
+                        </div>
+                        <table class="min-w-full divide-y divide-slate-200 text-left">
+                            <thead class="bg-slate-50 text-slate-500 font-semibold text-[10px] uppercase">
+                                <tr>
+                                    <th class="px-6 py-2">id (PK)</th>
+                                    <th class="px-6 py-2">title</th>
+                                    <th class="px-6 py-2">status</th>
+                                    <th class="px-6 py-2">state (JSONB logs)</th>
+                                    <th class="px-6 py-2">updated_at</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="db-row-campaign">
+                                    <td colspan="5" class="px-6 py-4 text-center text-slate-400">尚未建立企劃</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- campaign_outputs table mock rows -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div class="bg-slate-800 text-white px-4 py-2 font-semibold flex justify-between">
+                                <span>Table: campaign_outputs (生成產物資料表)</span>
+                                <span class="font-mono text-[10px]">SELECT type, content, asset_url FROM campaign_outputs;</span>
+                            </div>
+                            <table class="min-w-full divide-y divide-slate-200 text-left">
+                                <thead class="bg-slate-50 text-slate-500 font-semibold text-[10px] uppercase">
+                                    <tr>
+                                        <th class="px-6 py-2">id (PK)</th>
+                                        <th class="px-6 py-2">output_type</th>
+                                        <th class="px-6 py-2">content / metadata</th>
+                                        <th class="px-6 py-2">asset_url</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="db-body-outputs">
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-4 text-center text-slate-400">尚未產生輸出資產</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- user_configs table mock rows -->
+                        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div class="bg-slate-800 text-white px-4 py-2 font-semibold flex justify-between">
+                                <span>Table: user_configs (用戶設定檔資料表)</span>
+                                <span class="font-mono text-[10px]">SELECT brand_voice, target_audience FROM user_configs;</span>
+                            </div>
+                            <table class="min-w-full divide-y divide-slate-200 text-left">
+                                <thead class="bg-slate-50 text-slate-500 font-semibold text-[10px] uppercase">
+                                    <tr>
+                                        <th class="px-6 py-2">id (PK)</th>
+                                        <th class="px-6 py-2">user_id</th>
+                                        <th class="px-6 py-2">brand_voice</th>
+                                        <th class="px-6 py-2">target_audience</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="db-row-config">
+                                        <td colspan="4" class="px-6 py-4 text-center text-slate-400">尚未初始化設定檔</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-500 py-6 px-8 text-center text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Marketing App - Developer Portal. Built for local offline deployment.</p>
+            <div class="flex gap-4">
+                <a href="../README.md" class="hover:text-slate-300">Project README</a>
+                <a href="../backend/README.md" class="hover:text-slate-300">Backend Guide</a>
+                <a href="../frontend/README.md" class="hover:text-slate-300">Frontend Guide</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load Sandbox Logic -->
+    <script src="script.js"></script>
+</body>
+</html>

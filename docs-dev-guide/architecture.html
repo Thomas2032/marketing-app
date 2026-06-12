@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing App Developer Portal - Architecture & LangGraph</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-indigo-950 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white py-6 px-8 border-b border-violet-800 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500 text-sm font-bold text-white shadow-md">M</span>
+                    <h1 class="text-2xl font-bold tracking-tight">Marketing App</h1>
+                </div>
+                <p class="text-slate-300 text-xs mt-1">Developer Portal & Onboarding Suite</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">Next.js 16</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">FastAPI</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">LangGraph</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">PostgreSQL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Navigation Panel (Sidebar) -->
+        <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-2">Navigation</h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="index.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        1. System Overview
+                    </a>
+                    <a href="architecture.html" class="nav-link-active w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 transition-all block">
+                        2. Architecture & LangGraph
+                    </a>
+                    <a href="database.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        3. Database Schema
+                    </a>
+                    <a href="api.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        4. API Route Trace
+                    </a>
+                    <a href="frontend.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        5. Frontend & Features
+                    </a>
+                    <a href="simulator.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        6. Sandbox Simulator
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Access Links -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">Critical Files</h3>
+                <ul class="text-xs space-y-2 font-mono text-slate-600">
+                    <li class="truncate" title="backend/app/db/models.py">📁 <span class="font-semibold">models.py</span></li>
+                    <li class="truncate" title="backend/app/agents/orchestrator.py">📁 <span class="font-semibold">orchestrator.py</span></li>
+                    <li class="truncate" title="backend/app/services/campaign_state_helper.py">📁 <span class="font-semibold">state_helper.py</span></li>
+                    <li class="truncate" title="backend/app/api/routes/campaigns.py">📁 <span class="font-semibold">routes/campaigns.py</span></li>
+                    <li class="truncate" title="frontend/src/lib/constants.ts">📁 <span class="font-semibold">constants.ts</span></li>
+                    <li class="truncate" title="frontend/src/components/CampaignResults.tsx">📁 <span class="font-semibold">CampaignResults.tsx</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-w-0 animate-fade-in">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">2. Architecture & LangGraph Agent Loop</h2>
+                <p class="text-sm text-slate-500 mt-1">Linear execution pipeline driven by StateGraph nodes and intermediate database updates.</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- LangGraph Intro -->
+                <div class="prose max-w-none text-slate-600 text-sm">
+                    <p>The campaign generation process is modeled as a stateful graph powered by <strong>LangGraph</strong>. The execution loop transitions data through discrete specialized agent nodes. Intermediate state and generated outputs are committed to the database incrementally at the start and completion of each node execution, rather than only at the end of the entire graph run. This enables the frontend to poll and render step-by-step progress bars in real-time.</p>
+                </div>
+
+                <!-- Interactive Flow Graph -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-4">Interactive Agent DAG (Directed Acyclic Graph)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Click on a node card to review its specific Python code implementation, state dependencies, and database persistence triggers below.</p>
+
+                    <div class="bg-slate-900 rounded-xl p-6 text-white overflow-x-auto shadow-inner">
+                        <div class="flex items-center justify-center min-w-[750px] gap-4 py-4 text-xs font-mono">
+                            <!-- Entry -->
+                            <div class="bg-indigo-950 border border-violet-800 text-violet-300 font-bold px-3 py-2 rounded-lg shadow-sm">
+                                START
+                            </div>
+                            <div class="w-8 connector-h shrink-0"></div>
+
+                            <!-- Extractor Node -->
+                            <div id="node-btn-extractor" onclick="selectNode('extractor')" class="node-card active-node border-2 border-violet-500 p-3 rounded-xl cursor-pointer w-32 text-center bg-slate-800/80 shadow-md">
+                                <span class="font-bold block text-violet-400">1. extractor</span>
+                                <span class="text-[9px] text-slate-300">extract_brief</span>
+                            </div>
+                            <div class="w-8 connector-h shrink-0"></div>
+
+                            <!-- Writer Node -->
+                            <div id="node-btn-writer" onclick="selectNode('writer')" class="node-card border-2 border-slate-700 p-3 rounded-xl cursor-pointer w-32 text-center bg-slate-800/80 shadow-sm">
+                                <span class="font-bold block text-violet-400">2. writer</span>
+                                <span class="text-[9px] text-slate-300">write_copy</span>
+                            </div>
+                            <div class="w-8 connector-h shrink-0"></div>
+
+                            <!-- Image Node -->
+                            <div id="node-btn-image" onclick="selectNode('image')" class="node-card border-2 border-slate-700 p-3 rounded-xl cursor-pointer w-32 text-center bg-slate-800/80 shadow-sm">
+                                <span class="font-bold block text-violet-400">3. image</span>
+                                <span class="text-[9px] text-slate-300">generate_visual</span>
+                            </div>
+                            <div class="w-8 connector-h shrink-0"></div>
+
+                            <!-- Reviewer Node -->
+                            <div id="node-btn-reviewer" onclick="selectNode('reviewer')" class="node-card border-2 border-slate-700 p-3 rounded-xl cursor-pointer w-32 text-center bg-slate-800/80 shadow-sm">
+                                <span class="font-bold block text-violet-400">4. reviewer</span>
+                                <span class="text-[9px] text-slate-300">review_outputs</span>
+                            </div>
+                            <div class="w-8 connector-h shrink-0"></div>
+
+                            <!-- End -->
+                            <div class="bg-indigo-950 border border-violet-800 text-violet-300 font-bold px-3 py-2 rounded-lg shadow-sm">
+                                END
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Details Bounding Box -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <!-- Tab Info Header -->
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                        <div>
+                            <h4 id="node-detail-title" class="font-bold text-sm text-indigo-900">Extractor Node (`extractor_node`)</h4>
+                            <p id="node-detail-desc" class="text-xs text-slate-500 mt-0.5">Parses the initial campaign brief into structured fields.</p>
+                        </div>
+                        <span id="node-detail-type" class="text-[10px] bg-violet-100 text-violet-700 font-mono font-bold px-2 py-0.5 rounded">output_type: "extracted"</span>
+                    </div>
+
+                    <!-- Details Body Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 text-xs">
+                        <!-- Left Panel: Inputs and Outputs -->
+                        <div class="p-6 space-y-4 lg:col-span-1">
+                            <div>
+                                <h5 class="font-bold text-indigo-950 mb-1">State Input Requirements:</h5>
+                                <ul id="node-detail-inputs" class="list-disc pl-4 space-y-1 text-slate-600">
+                                    <li><code>brief</code> (Original text user prompt)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-indigo-950 mb-1">State Modifications:</h5>
+                                <ul id="node-detail-mods" class="list-disc pl-4 space-y-1 text-slate-600">
+                                    <li><code>extracted</code> (Object with: product, audience, tone, key_messages, constraints)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-violet-50/50 p-3 rounded-lg border border-violet-100">
+                                <h5 class="font-bold text-violet-950 mb-1 text-[11px]">Database Action:</h5>
+                                <p id="node-detail-db" class="text-[10px] text-slate-600 leading-relaxed">Invokes <code>db_start_tool_call</code> with "extract_brief". Upon parsing successfully, stores the JSON metadata in a <code>CampaignOutput</code> (type: "extracted"), maps the FK output_ref in state.tool_calls, and updates the state.extracted column.</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Code Window -->
+                        <div class="lg:col-span-2 bg-slate-950 text-white flex flex-col font-mono text-[10px]">
+                            <div class="code-header px-4 py-2 border-b border-slate-800 flex justify-between">
+                                <span id="node-code-filename">backend/app/agents/nodes/extractor.py</span>
+                                <span class="text-slate-500">Python</span>
+                            </div>
+                            <div class="p-4 overflow-y-auto max-h-[300px] leading-relaxed">
+                                <pre id="node-code-block" class="text-slate-300">async def extractor_node(state: CampaignGraphState) -> dict:
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "extract_brief")
+    try:
+        settings = get_settings()
+        llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.2)
+        response = await llm.ainvoke(
+            [
+                SystemMessage(content=EXTRACTOR_SYSTEM),
+                HumanMessage(content=state["brief"]),
+            ]
+        )
+        content = response.content
+        parsed: ExtractedBrief = json.loads(str(content))
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="extract_brief",
+            output_type="extracted",
+            content=None,
+            metadata_=parsed
+        )
+        return {"extracted": parsed}
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "extract_brief")
+        raise</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incremental State Helper Deep Dive -->
+                <div class="bg-violet-50 border border-violet-100 p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold text-lg text-violet-950">Incremental State Commit Pattern</h3>
+                    <p class="text-xs text-slate-700 leading-relaxed">
+                        To enable asynchronous progress tracking, each node relies on transactional commits mid-run using <code>app/services/campaign_state_helper.py</code>. This module runs queries inside discrete DB sessions to bypass the main execution thread's uncommitted transaction.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
+                        <div>
+                            <span class="text-indigo-950 font-bold block mb-2 font-sans">1. Start of Tool Run (Pending Indicator)</span>
+                            <div class="bg-slate-900 text-slate-300 rounded-lg p-4 max-h-56 overflow-auto">
+                                <pre># Incremental db_start_tool_call
+# Inserts a 'running' entry in state.tool_calls
+# and commits immediately.
+tool_calls.append({
+    "tool_run_id": f"tool-{uuid.uuid4()}",
+    "tool": tool_name,
+    "status": "running",
+    "started_at": datetime.utcnow().isoformat()
+})
+campaign.state = current_state
+await session.commit()</pre>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-indigo-950 font-bold block mb-2 font-sans">2. Tool Completion (Payload + Output Link)</span>
+                            <div class="bg-slate-900 text-slate-300 rounded-lg p-4 max-h-56 overflow-auto">
+                                <pre># Incremental db_complete_tool_call
+# Upserts CampaignOutput (to overwrite old iterations)
+# updates tool_calls to 'completed' with output_ref,
+# updates campaign.state fields, and commits.
+output = CampaignOutput(output_type=output_type, ...)
+session.add(output)
+await session.flush()
+
+call["status"] = "completed"
+call["output_ref"] = str(output.id)
+current_state[output_type_key] = content/metadata_
+await session.commit()</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-500 py-6 px-8 text-center text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Marketing App - Developer Portal. Built for local offline deployment.</p>
+            <div class="flex gap-4">
+                <a href="../README.md" class="hover:text-slate-300">Project README</a>
+                <a href="../backend/README.md" class="hover:text-slate-300">Backend Guide</a>
+                <a href="../frontend/README.md" class="hover:text-slate-300">Frontend Guide</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive script for toggling node details -->
+    <script>
+        const nodesData = {
+            extractor: {
+                title: "Extractor Node (`extractor_node`)",
+                desc: "Parses the initial campaign brief into structured fields.",
+                type: 'output_type: "extracted"',
+                inputs: ["<code>brief</code> (Original text user prompt)"],
+                mods: ["<code>extracted</code> (Object with: product, audience, tone, key_messages, constraints)"],
+                db: "Invokes <code>db_start_tool_call</code> with \"extract_brief\". Upon parsing successfully, stores the JSON metadata in a <code>CampaignOutput</code> (type: \"extracted\"), maps the FK output_ref in state.tool_calls, and updates the state.extracted column.",
+                filename: "backend/app/agents/nodes/extractor.py",
+                code: `async def extractor_node(state: CampaignGraphState) -> dict:
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "extract_brief")
+    try:
+        settings = get_settings()
+        llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.2)
+        response = await llm.ainvoke([
+            SystemMessage(content=EXTRACTOR_SYSTEM),
+            HumanMessage(content=state["brief"]),
+        ])
+        content = response.content
+        parsed: ExtractedBrief = json.loads(str(content))
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="extract_brief",
+            output_type="extracted",
+            content=None,
+            metadata_=parsed
+        )
+        return {"extracted": parsed}
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "extract_brief")
+        raise`
+            },
+            writer: {
+                title: "Writer Node (`writer_node`)",
+                desc: "Generates platform-specific copy (headline, body, and CTA).",
+                type: 'output_type: "copy"',
+                inputs: [
+                    "<code>brief</code> (Original brief)",
+                    "<code>brand_voice</code> & <code>target_audience</code> (from UserConfig)",
+                    "<code>extracted</code> (brief data from extractor)",
+                    "<code>messages</code> (accumulated conversation log history)"
+                ],
+                mods: [
+                    "<code>copy_draft</code> (resulting ad copy text)",
+                    "<code>messages</code> (appends AIMessage containing the copy)"
+                ],
+                db: "Starts tool call \"write_copy\". Generates copy via ChatOpenAI (temperature 0.7) taking into account historical messages to allow feedback revision. Saves copy string inside <code>CampaignOutput</code> (type: \"copy\") and syncs state.copy_draft.",
+                filename: "backend/app/agents/nodes/writer.py",
+                code: `async def writer_node(state: CampaignGraphState) -> dict:
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "write_copy")
+    try:
+        settings = get_settings()
+        llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.7)
+        prompt = f"""Brand voice: {state.get("brand_voice", "professional")}
+Target audience: {state.get("target_audience", "general")}
+Extracted brief: {state.get("extracted", {})}
+Original brief: {state["brief"]}"""
+
+        messages = [
+            SystemMessage(content=WRITER_SYSTEM),
+            HumanMessage(content=prompt),
+        ]
+        if state.get("messages"):
+            messages.extend(state["messages"])
+
+        response = await llm.ainvoke(messages)
+        copy_draft = str(response.content)
+
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="write_copy",
+            output_type="copy",
+            content=copy_draft
+        )
+        return {
+            "copy_draft": copy_draft,
+            "messages": [AIMessage(content=copy_draft)]
+        }
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "write_copy")
+        raise`
+            },
+            image: {
+                title: "Image Node (`image_node`)",
+                desc: "Converts generated copy to image prompt and calls DALL-E 3.",
+                type: 'output_type: "image"',
+                inputs: [
+                    "<code>copy_draft</code> (generated copy text)",
+                    "<code>extracted</code> (brief context)"
+                ],
+                mods: [
+                    "<code>image_prompt</code> (prompt text for DALL-E)",
+                    "<code>image_url</code> (public S3/R2 asset address)"
+                ],
+                db: "Starts tool call \"generate_visual\". Generates prompt from copy, invokes DALL-E 3 API, downloads binary, uploads it to S3/R2 storage via <code>upload_generated_image</code>. Saves prompt in <code>CampaignOutput.content</code> and asset URL in <code>CampaignOutput.asset_url</code>.",
+                filename: "backend/app/agents/nodes/image.py",
+                code: `async def image_node(state: CampaignGraphState) -> dict:
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "generate_visual")
+    try:
+        settings = get_settings()
+        llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.5)
+        prompt_context = f"Copy: {state.get('copy_draft', '')}\\nBrief: {state.get('extracted', {})}"
+
+        response = await llm.ainvoke([
+            SystemMessage(content=IMAGE_SYSTEM),
+            HumanMessage(content=prompt_context),
+        ])
+        image_prompt = str(response.content).strip()
+
+        image_url = ""
+        if settings.openai_api_key and settings.storage_access_key:
+            image_url = await upload_generated_image(campaign_id=campaign_id, prompt=image_prompt)
+
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="generate_visual",
+            output_type="image",
+            content=image_prompt,
+            asset_url=image_url or None
+        )
+        return {"image_prompt": image_prompt, "image_url": image_url}
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "generate_visual")
+        raise`
+            },
+            reviewer: {
+                title: "Reviewer Node (`reviewer_node`)",
+                desc: "Reviews output compliance, alignment, scoring, and provides modifications.",
+                type: 'output_type: "review"',
+                inputs: [
+                    "<code>copy_draft</code> (generated copywriting)",
+                    "<code>image_prompt</code> (visual prompt)",
+                    "<code>extracted</code> (brief criteria)"
+                ],
+                mods: [
+                    "<code>review</code> (Score, suggestions list, approved flag, and revised_copy)"
+                ],
+                db: "Starts tool call \"review_outputs\". Evaluates copy and image prompt, outputs JSON. Saves score, suggestions list inside <code>CampaignOutput.metadata_</code> and revised copy inside <code>CampaignOutput.content</code> (type: \"review\"). Updates state.review.",
+                filename: "backend/app/agents/nodes/reviewer.py",
+                code: `async def reviewer_node(state: CampaignGraphState) -> dict:
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "review_outputs")
+    try:
+        settings = get_settings()
+        llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.3)
+        review_input = f"Copy: {state.get('copy_draft', '')}\\nPrompt: {state.get('image_prompt', '')}\\nBrief: {state.get('extracted', {})}"
+
+        response = await llm.ainvoke([
+            SystemMessage(content=REVIEWER_SYSTEM),
+            HumanMessage(content=review_input),
+        ])
+        review: ReviewFeedback = json.loads(str(response.content))
+
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="review_outputs",
+            output_type="review",
+            content=review.get("revised_copy"),
+            metadata_=review
+        )
+        return {"review": review}
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "review_outputs")
+        raise`
+            }
+        };
+
+        function selectNode(nodeKey) {
+            // Remove active classes
+            document.querySelectorAll('.node-card').forEach(card => {
+                card.classList.remove('active-node', 'border-violet-500');
+                card.classList.add('border-slate-700');
+            });
+
+            // Add active class
+            const activeCard = document.getElementById(`node-btn-${nodeKey}`);
+            if (activeCard) {
+                activeCard.classList.remove('border-slate-700');
+                activeCard.classList.add('active-node', 'border-violet-500');
+            }
+
+            // Fill details
+            const data = nodesData[nodeKey];
+            document.getElementById('node-detail-title').innerText = data.title;
+            document.getElementById('node-detail-desc').innerText = data.desc;
+            document.getElementById('node-detail-type').innerText = data.type;
+            document.getElementById('node-code-filename').innerText = data.filename;
+            document.getElementById('node-code-block').innerText = data.code;
+            document.getElementById('node-detail-db').innerHTML = data.db;
+
+            // Render inputs list
+            const inputsList = document.getElementById('node-detail-inputs');
+            inputsList.innerHTML = data.inputs.map(i => `<li>${i}</li>`).join('');
+
+            // Render modifications list
+            const modsList = document.getElementById('node-detail-mods');
+            modsList.innerHTML = data.mods.map(m => `<li>${m}</li>`).join('');
+        }
+    </script>
+</body>
+</html>

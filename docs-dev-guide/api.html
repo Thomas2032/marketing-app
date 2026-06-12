@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing App 開發者門戶 - API 路由與狀態機</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-indigo-950 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-950 text-white py-6 px-8 border-b border-violet-800 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500 text-sm font-bold text-white shadow-md">M</span>
+                    <h1 class="text-2xl font-bold tracking-tight">Marketing App</h1>
+                </div>
+                <p class="text-slate-300 text-xs mt-1">開發者門戶與架構導航 (Developer Portal)</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">Next.js 16</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">FastAPI</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">LangGraph</span>
+                <span class="bg-indigo-900 border border-violet-700 px-3 py-1.5 rounded-md text-slate-300 font-mono">PostgreSQL</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 py-8 flex-1 flex flex-col lg:flex-row gap-8">
+
+        <!-- Left Navigation Panel (Sidebar) -->
+        <aside class="w-full lg:w-64 shrink-0 flex flex-col gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-2">導航 (Navigation)</h3>
+                <nav class="flex flex-col gap-1">
+                    <a href="index.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        1. 系統概述 (Overview)
+                    </a>
+                    <a href="architecture.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        2. 架構與 LangGraph 流程
+                    </a>
+                    <a href="database.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        3. 資料庫 Schema
+                    </a>
+                    <a href="api.html" class="nav-link-active w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 transition-all block">
+                        4. API 路由追蹤 (Trace)
+                    </a>
+                    <a href="frontend.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        5. 前端架構與功能
+                    </a>
+                    <a href="simulator.html" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold border-l-4 border-transparent text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 block">
+                        6. 狀態沙盒模擬器 (Simulator)
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Access Links -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 px-2">關鍵檔案</h3>
+                <ul class="text-xs space-y-2 font-mono text-slate-600">
+                    <li class="truncate" title="backend/app/db/models.py">📁 <span class="font-semibold">models.py</span></li>
+                    <li class="truncate" title="backend/app/agents/orchestrator.py">📁 <span class="font-semibold">orchestrator.py</span></li>
+                    <li class="truncate" title="backend/app/services/campaign_state_helper.py">📁 <span class="font-semibold">state_helper.py</span></li>
+                    <li class="truncate" title="backend/app/api/routes/campaigns.py">📁 <span class="font-semibold">routes/campaigns.py</span></li>
+                    <li class="truncate" title="frontend/src/lib/constants.ts">📁 <span class="font-semibold">constants.ts</span></li>
+                    <li class="truncate" title="frontend/src/components/CampaignResults.tsx">📁 <span class="font-semibold">CampaignResults.tsx</span></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-w-0 animate-fade-in">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">4. API 路由與企劃狀態機</h2>
+                <p class="text-sm text-slate-500 mt-1">後端 FastAPI 路由接口設計與 Campaign 行銷企劃的核心狀態轉移流程。</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- API Endpoints Table -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-3">REST API 路由清單</h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-3">方法 (Method)</th>
+                                    <th class="px-6 py-3">端點 (Endpoint)</th>
+                                    <th class="px-6 py-3">請求載荷 (Payload)</th>
+                                    <th class="px-6 py-3">狀態動作 / 業務邏輯</th>
+                                    <th class="px-6 py-3">回傳結構 (Response)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 font-medium">
+                                <tr>
+                                    <td class="px-6 py-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-mono font-bold">POST</span></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-900 font-semibold">/api/v1/campaigns</td>
+                                    <td class="px-6 py-4 text-slate-500 font-mono">CampaignCreate</td>
+                                    <td class="px-6 py-4">於庫中建立新企劃，初始狀態設為 <span class="bg-slate-100 px-1 py-0.5 rounded font-semibold font-mono">draft</span>，初始化對話歷史 `messages`。</td>
+                                    <td class="px-6 py-4 font-mono">CampaignRead</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-mono font-bold">GET</span></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-900 font-semibold">/api/v1/campaigns</td>
+                                    <td class="px-6 py-4 text-slate-500">Query: user_id, limit</td>
+                                    <td class="px-6 py-4">列出該用戶的所有企劃摘要（不包含 outputs 明細），依更新時間倒序排列。</td>
+                                    <td class="px-6 py-4 font-mono">list[CampaignSummaryRead]</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-mono font-bold">GET</span></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-900 font-semibold">/api/v1/campaigns/{id}</td>
+                                    <td class="px-6 py-4 text-slate-500">無</td>
+                                    <td class="px-6 py-4">讀取特定企劃詳情，並**級聯加載 (selectinload)** 所有關聯的 `outputs`。</td>
+                                    <td class="px-6 py-4 font-mono">CampaignRead</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-mono font-bold">POST</span></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-900 font-semibold">/api/v1/campaigns/{id}/run</td>
+                                    <td class="px-6 py-4 text-slate-500">無</td>
+                                    <td class="px-6 py-4">若使用佇列 (`use_queue=True`)，狀態轉為 <span class="bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded font-semibold font-mono">queued</span> 並入 arq 佇列；否則轉為 <span class="bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-semibold font-mono">running</span> 並觸發 BackgroundTasks 後台執行緒。</td>
+                                    <td class="px-6 py-4 font-mono">CampaignRunResponse</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-mono font-bold">POST</span></td>
+                                    <td class="px-6 py-4 font-mono text-indigo-900 font-semibold">/api/v1/campaigns/{id}/messages</td>
+                                    <td class="px-6 py-4 text-slate-500 font-mono">{ content: string }</td>
+                                    <td class="px-6 py-4">將用戶追問訊息寫入 `messages` 中，**重置並清空 `tool_calls` 與 `last_completed_tool`**，並將狀態設為 `running` / `queued` 重新跑一遍 LangGraph。</td>
+                                    <td class="px-6 py-4 font-mono">CampaignRead</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- State Machine Flowchart -->
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-4">企劃狀態遷移圖 (Campaign Status Transitions)</h3>
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <div class="flex flex-col items-center gap-6 md:flex-row md:justify-around text-xs font-mono">
+
+                            <!-- Draft -->
+                            <div class="flex flex-col items-center">
+                                <div class="bg-white border-2 border-slate-300 p-4 rounded-xl shadow-xs text-center w-36">
+                                    <span class="font-bold block text-slate-800">DRAFT</span>
+                                    <span class="text-[9px] text-slate-400">剛建立 (POST)</span>
+                                </div>
+                                <span class="text-slate-400 mt-2">➔ POST /run</span>
+                            </div>
+
+                            <!-- Queued / Running Branch -->
+                            <div class="flex flex-col gap-4">
+                                <div class="bg-white border-2 border-indigo-300 p-3 rounded-xl shadow-xs text-center w-40">
+                                    <span class="font-bold block text-indigo-700">QUEUED</span>
+                                    <span class="text-[9px] text-slate-400">若 use_queue = True</span>
+                                </div>
+                                <div class="flex justify-center text-slate-400">⬇ arq 工作進程接單</div>
+                                <div class="bg-white border-2 border-amber-300 p-3 rounded-xl shadow-xs text-center w-40">
+                                    <span class="font-bold block text-amber-700">RUNNING</span>
+                                    <span class="text-[9px] text-slate-400">正在執行 LangGraph</span>
+                                </div>
+                            </div>
+
+                            <!-- Arrow to Terminal States -->
+                            <div class="hidden md:block text-slate-400 text-lg font-bold">➔</div>
+
+                            <!-- Terminal States -->
+                            <div class="flex flex-col gap-3">
+                                <!-- Completed -->
+                                <div class="bg-emerald-50 border-2 border-emerald-500 p-3 rounded-xl shadow-xs text-center w-40">
+                                    <span class="font-bold block text-emerald-800">COMPLETED</span>
+                                    <span class="text-[9px] text-slate-500">審核通過 (Approved)</span>
+                                </div>
+                                <!-- Review -->
+                                <div class="bg-purple-50 border-2 border-purple-500 p-3 rounded-xl shadow-xs text-center w-40 relative">
+                                    <span class="font-bold block text-purple-800">REVIEW</span>
+                                    <span class="text-[9px] text-slate-500">審核有修改建議</span>
+                                    <!-- Backwards loop -->
+                                    <div class="absolute -bottom-5 right-2 text-[9px] text-violet-600 font-semibold bg-violet-50 px-1 border border-violet-200 rounded">
+                                        POST /messages ➔ 重置並回到 RUNNING
+                                    </div>
+                                </div>
+                                <!-- Failed -->
+                                <div class="bg-red-50 border-2 border-red-500 p-3 rounded-xl shadow-xs text-center w-40">
+                                    <span class="font-bold block text-red-800">FAILED</span>
+                                    <span class="text-[9px] text-slate-500">執行異常中斷</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continuous Chat Rerun Deep Dive -->
+                <div class="border border-slate-200 rounded-2xl p-6 space-y-4">
+                    <h3 class="font-bold text-base text-indigo-950">追問回饋機制設計 (Continuous Chat Rerun Loop)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        當用戶對生成文案不滿意並輸入微調要求時，前端會調用 <code>POST /messages</code> 端點。後端並非重新建立一個企劃，而是採取以下清空斷點與變更歷史的步驟來進行<strong>重新運行 (Rerun)</strong>：
+                    </p>
+                    <div class="bg-slate-900 text-slate-300 rounded-xl p-5 font-mono text-[10px] leading-relaxed">
+<pre><span class="text-slate-500"># 於 api/routes/campaigns.py:post_campaign_message</span>
+current_state = dict(campaign.state)
+
+<span class="text-slate-500"># 1. 追加入對話歷史 (包含 role: "user" 與微調文字)</span>
+current_state["messages"].append({
+    "role": "user",
+    "content": payload.content,
+    "created_at": datetime.utcnow().isoformat()
+})
+
+<span class="text-slate-500"># 2. 清空先前的工具呼叫歷史，讓前端進度條重置</span>
+current_state["tool_calls"] = []
+
+<span class="text-slate-500"># 3. 清空斷點指示，強迫圖執行從第一個節點 (extractor) 重新開始</span>
+current_state["last_completed_tool"] = None
+
+campaign.state = current_state
+campaign.status = CampaignStatus.RUNNING
+await db.commit()
+
+<span class="text-slate-500"># 4. 再次觸發後台執行</span>
+background_tasks.add_task(execute_campaign, str(campaign_id))</pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-500 py-6 px-8 text-center text-xs mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 Marketing App - Developer Portal. Built for local offline deployment.</p>
+            <div class="flex gap-4">
+                <a href="../README.md" class="hover:text-slate-300">Project README</a>
+                <a href="../backend/README.md" class="hover:text-slate-300">Backend Guide</a>
+                <a href="../frontend/README.md" class="hover:text-slate-300">Frontend Guide</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
