@@ -2,8 +2,10 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm import selectinload
 
-from app.agents.orchestrator import run_campaign_pipeline
+from app.agents.orchestrator import run_campaign_pipeline, serialize_messages
 from app.db.models import Campaign, CampaignOutput, CampaignStatus, UserConfig
 
 
@@ -27,7 +29,12 @@ async def _run_campaign(campaign_id: str, session: AsyncSession) -> dict:
         if not campaign:
             raise ValueError(f"Campaign {campaign_id} not found")
 
+        current_state = dict(campaign.state) if campaign.state else {}
+        current_state["tool_calls"] = []
+        current_state["last_completed_tool"] = None
+        campaign.state = current_state
         campaign.status = CampaignStatus.RUNNING
+        flag_modified(campaign, "state")
         await session.commit()
 
         brand_voice = "professional"
@@ -47,41 +54,36 @@ async def _run_campaign(campaign_id: str, session: AsyncSession) -> dict:
             brief=campaign.brief,
             brand_voice=brand_voice,
             target_audience=target_audience,
+            existing_state=campaign.state,
         )
 
-        outputs = [
-            CampaignOutput(
-                campaign_id=campaign.id,
-                output_type="extracted",
-                content=None,
-                metadata_=state.get("extracted", {}),
-            ),
-            CampaignOutput(
-                campaign_id=campaign.id,
-                output_type="copy",
-                content=state.get("copy_draft", ""),
-            ),
-            CampaignOutput(
-                campaign_id=campaign.id,
-                output_type="image",
-                content=state.get("image_prompt", ""),
-                asset_url=state.get("image_url") or None,
-            ),
-            CampaignOutput(
-                campaign_id=campaign.id,
-                output_type="review",
-                content=state.get("review", {}).get("revised_copy"),
-                metadata_=state.get("review", {}),
-            ),
-        ]
-        session.add_all(outputs)
+        # Re-fetch campaign to get the latest DB updates from incremental saves
+        result = await session.execute(
+            select(Campaign)
+            .options(selectinload(Campaign.outputs))
+            .where(Campaign.id == uuid.UUID(campaign_id))
+        )
+        campaign = result.scalar_one_or_none()
+        if not campaign:
+            raise ValueError(f"Campaign {campaign_id} not found")
 
-        campaign.state = dict(state)
+        current_state = dict(campaign.state) if campaign.state else {}
+        current_state.update({
+            "extracted": state.get("extracted", {}),
+            "copy_draft": state.get("copy_draft", ""),
+            "image_prompt": state.get("image_prompt", ""),
+            "image_url": state.get("image_url", ""),
+            "review": state.get("review", {}),
+            "errors": state.get("errors", []),
+            "messages": serialize_messages(state.get("messages", []))
+        })
+        campaign.state = current_state
         campaign.status = (
             CampaignStatus.COMPLETED
             if state.get("review", {}).get("approved", True)
             else CampaignStatus.REVIEW
         )
+        flag_modified(campaign, "state")
         await session.commit()
 
         return {"campaign_id": str(campaign.id), "status": campaign.status.value}

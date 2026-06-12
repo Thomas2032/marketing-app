@@ -48,10 +48,10 @@ def upload_bytes(
 async def upload_generated_image(*, campaign_id: str, prompt: str) -> str:
     """Generate an image via OpenAI DALL-E and upload to S3/R2."""
     import httpx
-    from openai import AsyncOpenAI
 
-    settings = get_settings()
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    from app.services.llm_factory import get_image_client
+
+    client = get_image_client()
 
     response = await client.images.generate(
         model="dall-e-3",

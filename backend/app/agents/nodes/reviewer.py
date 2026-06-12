@@ -1,10 +1,10 @@
 import json
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_openai import ChatOpenAI
 
 from app.agents.state import CampaignGraphState, ReviewFeedback
-from app.config import get_settings
+from app.services.llm_factory import get_llm_client
+from app.services.campaign_state_helper import db_start_tool_call, db_complete_tool_call, db_fail_tool_call
 
 
 REVIEWER_SYSTEM = """You are a senior marketing reviewer. Evaluate campaign copy and image prompt alignment.
@@ -12,10 +12,13 @@ Return valid JSON only with keys: approved (bool), score (0-100), suggestions (a
 
 
 async def reviewer_node(state: CampaignGraphState) -> dict:
-    settings = get_settings()
-    llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key, temperature=0.3)
+    campaign_id = state["campaign_id"]
+    tool_run_id = await db_start_tool_call(campaign_id, "review_outputs")
 
-    review_input = f"""Copy draft:
+    try:
+        llm = get_llm_client(temperature=0.3)
+
+        review_input = f"""Copy draft:
 {state.get("copy_draft", "")}
 
 Image prompt:
@@ -25,25 +28,37 @@ Extracted brief:
 {state.get("extracted", {})}
 """
 
-    response = await llm.ainvoke(
-        [
-            SystemMessage(content=REVIEWER_SYSTEM),
-            HumanMessage(content=review_input),
-        ]
-    )
+        response = await llm.ainvoke(
+            [
+                SystemMessage(content=REVIEWER_SYSTEM),
+                HumanMessage(content=review_input),
+            ]
+        )
 
-    content = response.content
-    if isinstance(content, list):
-        content = "".join(str(part) for part in content)
+        content = response.content
+        if isinstance(content, list):
+            content = "".join(str(part) for part in content)
 
-    try:
-        review: ReviewFeedback = json.loads(str(content))
-    except json.JSONDecodeError:
-        review = {
-            "approved": True,
-            "score": 75,
-            "suggestions": ["Manual review recommended."],
-            "revised_copy": state.get("copy_draft", ""),
-        }
+        try:
+            review: ReviewFeedback = json.loads(str(content))
+        except json.JSONDecodeError:
+            review = {
+                "approved": True,
+                "score": 75,
+                "suggestions": ["Manual review recommended."],
+                "revised_copy": state.get("copy_draft", ""),
+            }
 
-    return {"review": review}
+        await db_complete_tool_call(
+            campaign_id=campaign_id,
+            tool_run_id=tool_run_id,
+            tool_name="review_outputs",
+            output_type="review",
+            content=review.get("revised_copy"),
+            metadata_=review
+        )
+
+        return {"review": review}
+    except Exception:
+        await db_fail_tool_call(campaign_id, tool_run_id, "review_outputs")
+        raise
