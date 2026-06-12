@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Campaign } from "@/types/campaign";
-import { getCampaign } from "@/lib/api";
+import { getCampaign, sendCampaignMessage } from "@/lib/api";
 import { USE_BACKEND } from "@/lib/constants";
 import {
   appendUserMessage,
@@ -32,6 +32,7 @@ export function CampaignResults({ campaignId, initial }: CampaignResultsProps) {
   const [campaign, setCampaign] = useState<Campaign | null>(initial ?? null);
   const [error, setError] = useState<string | null>(null);
   const [followUpMessage, setFollowUpMessage] = useState("");
+  const [pollingTrigger, setPollingTrigger] = useState(0);
   const stopTurnRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -78,14 +79,14 @@ export function CampaignResults({ campaignId, initial }: CampaignResultsProps) {
       }
     }
 
-    if (!initial || !TERMINAL_STATUSES.has(initial.status)) {
+    if (!campaign || !TERMINAL_STATUSES.has(campaign.status)) {
       poll();
     }
 
     return () => {
       active = false;
     };
-  }, [campaignId, initial]);
+  }, [campaignId, initial, pollingTrigger]);
 
   if (error) {
     return (
@@ -103,7 +104,7 @@ export function CampaignResults({ campaignId, initial }: CampaignResultsProps) {
     );
   }
 
-  function handleFollowUpSubmit() {
+  async function handleFollowUpSubmit() {
     const trimmed = followUpMessage.trim();
     if (!trimmed || !campaign) return;
 
@@ -121,7 +122,34 @@ export function CampaignResults({ campaignId, initial }: CampaignResultsProps) {
       return;
     }
 
-    setFollowUpMessage("");
+    try {
+      setFollowUpMessage("");
+      // Update local state immediately to show running state and message
+      const updatedCampaign = {
+        ...campaign,
+        status: "running" as const,
+        state: {
+          ...campaign.state,
+          messages: [
+            ...(Array.isArray(campaign.state.messages) ? campaign.state.messages : []),
+            {
+              role: "user" as const,
+              content: trimmed,
+              created_at: new Date().toISOString(),
+            }
+          ],
+          tool_calls: [],
+          last_completed_tool: null,
+        }
+      };
+      setCampaign(updatedCampaign);
+
+      const data = await sendCampaignMessage(campaignId, trimmed);
+      setCampaign(data);
+      setPollingTrigger((prev) => prev + 1); // Trigger polling loop
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send message");
+    }
   }
 
   return (

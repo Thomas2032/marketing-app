@@ -1,9 +1,12 @@
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.api.deps import get_db
 from app.config import get_settings
@@ -18,6 +21,10 @@ from app.services.campaign_runner import execute_campaign
 from app.services.queue import enqueue_campaign_run
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+
+
+class CampaignMessagePayload(BaseModel):
+    content: str = Field(..., min_length=1)
 
 
 @router.post("", response_model=CampaignRead, status_code=status.HTTP_201_CREATED)
@@ -51,6 +58,15 @@ async def create_campaign(
         brief=payload.brief,
         user_config_id=user_config.id if user_config else None,
         status=CampaignStatus.DRAFT,
+        state={
+            "tool_calls": [],
+            "messages": [{
+                "role": "user",
+                "content": payload.brief,
+                "created_at": datetime.utcnow().isoformat() + "Z"
+            }],
+            "last_completed_tool": None
+        }
     )
     db.add(campaign)
     await db.commit()
@@ -120,3 +136,47 @@ async def run_campaign(
         campaign_id=campaign.id,
         status=CampaignStatus.RUNNING,
     )
+
+
+@router.post("/{campaign_id}/messages", response_model=CampaignRead)
+async def post_campaign_message(
+    campaign_id: uuid.UUID,
+    payload: CampaignMessagePayload,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+) -> Campaign:
+    result = await db.execute(
+        select(Campaign)
+        .options(selectinload(Campaign.outputs))
+        .where(Campaign.id == campaign_id)
+    )
+    campaign = result.scalar_one_or_none()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    current_state = dict(campaign.state) if campaign.state else {}
+    messages = list(current_state.get("messages", []))
+    messages.append({
+        "role": "user",
+        "content": payload.content,
+        "created_at": datetime.utcnow().isoformat() + "Z"
+    })
+    current_state["messages"] = messages
+    current_state["tool_calls"] = []
+    current_state["last_completed_tool"] = None
+
+    campaign.state = current_state
+    flag_modified(campaign, "state")
+
+    settings = get_settings()
+    if settings.use_queue:
+        campaign.status = CampaignStatus.QUEUED
+        await db.commit()
+        await enqueue_campaign_run(str(campaign_id))
+    else:
+        campaign.status = CampaignStatus.RUNNING
+        await db.commit()
+        background_tasks.add_task(execute_campaign, str(campaign_id))
+
+    await db.refresh(campaign)
+    return campaign

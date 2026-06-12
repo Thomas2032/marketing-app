@@ -38,3 +38,10 @@ export async function getCampaign(id: string): Promise<Campaign> {
 export async function runCampaign(id: string): Promise<{ campaign_id: string; status: string }> {
   return request(`/campaigns/${id}/run`, { method: "POST" });
 }
+
+export async function sendCampaignMessage(id: string, content: string): Promise<Campaign> {
+  return request<Campaign>(`/campaigns/${id}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+}
