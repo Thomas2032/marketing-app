@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,6 +16,37 @@ class CampaignStatus(str, enum.Enum):
     REVIEW = "review"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class PublishPlatform(str, enum.Enum):
+    LINKEDIN = "LinkedIn"
+    X = "X"
+    INSTAGRAM = "Instagram"
+    FACEBOOK = "Facebook"
+
+
+class PublishStatus(str, enum.Enum):
+    DRAFT = "draft"
+    SCHEDULED = "scheduled"
+    PUBLISHED = "published"
+    FAILED = "failed"
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    name: Mapped[str] = mapped_column(String(256))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    campaigns: Mapped[list["Campaign"]] = relationship(back_populates="project")
+    publish_queue_items: Mapped[list["PublishQueueItem"]] = relationship(back_populates="project")
+    publish_batches: Mapped[list["PublishBatch"]] = relationship(back_populates="project")
 
 
 class UserConfig(Base):
@@ -54,6 +85,10 @@ class Campaign(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id"), nullable=True, index=True
+    )
+    project: Mapped["Project | None"] = relationship(back_populates="campaigns")
     user_config: Mapped["UserConfig | None"] = relationship(back_populates="campaigns")
     outputs: Mapped[list["CampaignOutput"]] = relationship(
         back_populates="campaign", cascade="all, delete-orphan"
@@ -74,3 +109,59 @@ class CampaignOutput(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     campaign: Mapped["Campaign"] = relationship(back_populates="outputs")
+
+
+class PublishBatch(Base):
+    __tablename__ = "publish_batches"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id"), index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    project: Mapped["Project"] = relationship(back_populates="publish_batches")
+    items: Mapped[list["PublishQueueItem"]] = relationship(back_populates="batch")
+
+
+class PublishQueueItem(Base):
+    __tablename__ = "publish_queue_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id"), index=True
+    )
+    campaign_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("campaigns.id"), index=True
+    )
+    output_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("campaign_outputs.id"), index=True
+    )
+    batch_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("publish_batches.id"), nullable=True, index=True
+    )
+    platform: Mapped[PublishPlatform] = mapped_column(Enum(PublishPlatform))
+    text: Mapped[str] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[PublishStatus] = mapped_column(
+        Enum(PublishStatus), default=PublishStatus.DRAFT, index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    project: Mapped["Project"] = relationship(back_populates="publish_queue_items")
+    campaign: Mapped["Campaign"] = relationship()
+    output: Mapped["CampaignOutput"] = relationship()
+    batch: Mapped["PublishBatch | None"] = relationship(back_populates="items")
+
+
+class ConnectedPlatform(Base):
+    __tablename__ = "connected_platforms"
+    __table_args__ = (
+        UniqueConstraint("user_id", "platform", name="uq_connected_platform_user_platform"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str] = mapped_column(String(128), index=True)
+    platform: Mapped[PublishPlatform] = mapped_column(Enum(PublishPlatform))
+    connected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

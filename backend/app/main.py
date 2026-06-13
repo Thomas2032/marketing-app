@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import campaigns, health
+from app.api.routes import campaigns, health, projects, publish
 from app.config import get_settings
 from app.db.session import init_db
 
@@ -34,6 +34,8 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(campaigns.router, prefix=settings.api_prefix)
+    app.include_router(projects.router, prefix=settings.api_prefix)
+    app.include_router(publish.router, prefix=settings.api_prefix)
 
     return app
 

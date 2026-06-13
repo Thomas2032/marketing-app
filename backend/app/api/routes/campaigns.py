@@ -54,6 +54,7 @@ async def create_campaign(
 
     campaign = Campaign(
         user_id=payload.user_id,
+        project_id=payload.project_id,
         title=payload.title,
         brief=payload.brief,
         user_config_id=user_config.id if user_config else None,
@@ -70,22 +71,30 @@ async def create_campaign(
     )
     db.add(campaign)
     await db.commit()
-    await db.refresh(campaign)
-    return campaign
+    result = await db.execute(
+        select(Campaign)
+        .options(selectinload(Campaign.outputs))
+        .where(Campaign.id == campaign.id)
+    )
+    return result.scalar_one()
 
 
 @router.get("", response_model=list[CampaignSummaryRead])
 async def list_campaigns(
     user_id: str,
+    project_id: uuid.UUID | None = None,
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
 ) -> list[Campaign]:
-    result = await db.execute(
+    q = (
         select(Campaign)
         .where(Campaign.user_id == user_id)
         .order_by(Campaign.updated_at.desc())
         .limit(min(max(limit, 1), 50))
     )
+    if project_id is not None:
+        q = q.where(Campaign.project_id == project_id)
+    result = await db.execute(q)
     return list(result.scalars().all())
 
 

@@ -10,6 +10,7 @@ class CampaignCreate(BaseModel):
     user_id: str = Field(..., min_length=1, max_length=128)
     title: str = Field(..., min_length=1, max_length=256)
     brief: str = Field(..., min_length=10)
+    project_id: uuid.UUID | None = None
     brand_voice: str | None = None
     target_audience: str | None = None
 
@@ -28,6 +29,7 @@ class CampaignOutputRead(BaseModel):
 class CampaignRead(BaseModel):
     id: uuid.UUID
     user_id: str
+    project_id: uuid.UUID | None = None
     title: str
     brief: str
     status: CampaignStatus
@@ -48,6 +50,7 @@ class CampaignRunResponse(BaseModel):
 
 class CampaignSummaryRead(BaseModel):
     id: uuid.UUID
+    project_id: uuid.UUID | None = None
     title: str
     status: CampaignStatus
     created_at: datetime

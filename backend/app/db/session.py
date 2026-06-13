@@ -20,6 +20,18 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Add columns that may be missing on pre-existing tables (idempotent)
+        await conn.execute(
+            _text(
+                "ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS "
+                "project_id UUID REFERENCES projects(id)"
+            )
+        )
+
+
+def _text(sql: str):  # thin wrapper to avoid top-level sqlalchemy import at module scope
+    from sqlalchemy import text
+    return text(sql)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
