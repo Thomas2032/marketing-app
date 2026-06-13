@@ -17,8 +17,9 @@ export function ProjectWorkspaceHeader({ projectId }: ProjectWorkspaceHeaderProp
   const isPublish = pathname.endsWith("/publish");
 
   useEffect(() => {
-    const project = getProject(projectId);
-    if (project) setName(project.name);
+    getProject(projectId).then((project) => {
+      if (project) setName(project.name);
+    });
   }, [projectId]);
 
   return (

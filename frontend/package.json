@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test",
+    "test:e2e:api": "playwright test tests/e2e/api.spec.ts",
+    "test:e2e:ui": "playwright test tests/e2e/ui.spec.ts",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -17,6 +21,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

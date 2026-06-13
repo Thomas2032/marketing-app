@@ -25,9 +25,13 @@ export function CreateProjectForm() {
     setLoading(true);
     setError(null);
 
-    const project = createProject(trimmed, description);
-    await new Promise((resolve) => window.setTimeout(resolve, 400));
-    router.push(`/projects/${project.id}`);
+    try {
+      const project = await createProject(trimmed, description);
+      router.push(`/projects/${project.id}`);
+    } catch {
+      setError("Failed to create project. Please try again.");
+      setLoading(false);
+    }
   }
 
   return (

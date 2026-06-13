@@ -53,7 +53,7 @@ export function PublishQueueEditor({
         connected={connectedPlatforms}
         onChange={(platforms) => {
           onConnectedChange(platforms);
-          setMockConnectedPlatforms(platforms);
+          setMockConnectedPlatforms(platforms, connectedPlatforms);
         }}
       />
 

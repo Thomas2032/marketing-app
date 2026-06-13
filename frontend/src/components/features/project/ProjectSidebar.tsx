@@ -25,7 +25,7 @@ export function ProjectSidebar({ open, activeProjectId, onClose }: ProjectSideba
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    setProjects(listProjects());
+    listProjects().then(setProjects);
   }, [pathname, open]);
 
   function handleSelect(projectId: string) {
@@ -33,13 +33,13 @@ export function ProjectSidebar({ open, activeProjectId, onClose }: ProjectSideba
     onClose();
   }
 
-  function handleDelete(projectId: string) {
+  async function handleDelete(projectId: string) {
     const project = projects.find((item) => item.id === projectId);
     const confirmed = window.confirm(`Delete project "${project?.name}"?`);
     if (!confirmed) return;
 
-    deleteProject(projectId);
-    const next = listProjects();
+    await deleteProject(projectId);
+    const next = await listProjects();
     setProjects(next);
 
     if (activeProjectId === projectId) {
@@ -47,13 +47,13 @@ export function ProjectSidebar({ open, activeProjectId, onClose }: ProjectSideba
     }
   }
 
-  function handleRename(projectId: string) {
+  async function handleRename(projectId: string) {
     const project = projects.find((item) => item.id === projectId);
     const nextName = window.prompt("Rename project", project?.name ?? "");
     if (nextName === null) return;
 
-    renameProject(projectId, nextName);
-    setProjects(listProjects());
+    await renameProject(projectId, nextName);
+    setProjects(await listProjects());
   }
 
   const panel = (

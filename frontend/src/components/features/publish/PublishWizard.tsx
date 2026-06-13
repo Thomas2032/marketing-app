@@ -39,25 +39,38 @@ export function PublishWizard({ projectId }: PublishWizardProps) {
   const [connectedPlatforms, setConnectedPlatforms] = useState<SocialPlatform[]>([]);
 
   useEffect(() => {
-    setLoading(true);
-    const items = listProjectCopyHistory(projectId);
-    setHistory(items);
+    let cancelled = false;
 
-    const existingQueue = getPublishQueue(projectId);
-    if (existingQueue.length > 0) {
-      setQueue(existingQueue);
-      setStep(2);
+    async function load() {
+      setLoading(true);
+      const items = listProjectCopyHistory(projectId);
+      if (!cancelled) setHistory(items);
+
+      const [existingQueue, platforms] = await Promise.all([
+        getPublishQueue(projectId),
+        getMockConnectedPlatforms(),
+      ]);
+
+      if (cancelled) return;
+
+      if (existingQueue.length > 0) {
+        setQueue(existingQueue);
+        setStep(2);
+      }
+
+      if (preselectCampaignId) {
+        const ids = items
+          .filter((item) => item.campaignId === preselectCampaignId)
+          .map((item) => item.id);
+        setSelectedIds(new Set(ids));
+      }
+
+      setConnectedPlatforms(platforms);
+      setLoading(false);
     }
 
-    if (preselectCampaignId) {
-      const ids = items
-        .filter((item) => item.campaignId === preselectCampaignId)
-        .map((item) => item.id);
-      setSelectedIds(new Set(ids));
-    }
-
-    setConnectedPlatforms(getMockConnectedPlatforms() as SocialPlatform[]);
-    setLoading(false);
+    load();
+    return () => { cancelled = true; };
   }, [projectId, preselectCampaignId]);
 
   const stepLabels = useMemo(
@@ -69,16 +82,16 @@ export function PublishWizard({ projectId }: PublishWizardProps) {
     [],
   );
 
-  function handleAddToQueue() {
+  async function handleAddToQueue() {
     const selected = history.filter((item) => selectedIds.has(item.id));
-    const next = addToPublishQueue(projectId, selected);
+    const next = await addToPublishQueue(projectId, selected);
     setQueue(next);
     setStep(2);
   }
 
-  function handleQueueChange(items: PublishQueueItem[]) {
+  async function handleQueueChange(items: PublishQueueItem[]) {
     setQueue(items);
-    savePublishQueue(projectId, items);
+    await savePublishQueue(projectId, items);
   }
 
   async function handleSubmit() {
