@@ -3,7 +3,7 @@ import { CreateProjectForm } from "@/components/features/project/CreateProjectFo
 
 export default function NewProjectPage() {
   return (
-    <CampaignShell backHref="/" backLabel="← Home">
+    <CampaignShell backHref="/" backLabel="← Home" contentWidth="wide">
       <CreateProjectForm />
     </CampaignShell>
   );

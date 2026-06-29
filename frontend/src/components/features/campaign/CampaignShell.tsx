@@ -15,6 +15,7 @@ type CampaignShellProps = {
   activeCampaignId?: string;
   backHref?: string;
   backLabel?: string;
+  contentWidth?: "narrow" | "wide";
 };
 
 export function CampaignShell({
@@ -23,6 +24,7 @@ export function CampaignShell({
   activeCampaignId,
   backHref = "/",
   backLabel = "← Home",
+  contentWidth = "narrow",
 }: CampaignShellProps) {
   const [sidebarOpen, setSidebarOpenState] = useState(false);
   const [resolvedProjectId, setResolvedProjectId] = useState<string | undefined>(
@@ -109,7 +111,12 @@ export function CampaignShell({
           </div>
         </header>
 
-        <main className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col px-4 py-8 pb-4 sm:px-6 sm:py-10 sm:pb-4">
+        <main
+          className={cn(
+            "mx-auto flex min-h-0 w-full flex-1 flex-col px-4 py-8 pb-4 sm:px-6 sm:py-10 sm:pb-4",
+            contentWidth === "wide" ? "max-w-7xl" : "max-w-3xl",
+          )}
+        >
           {children}
         </main>
       </div>

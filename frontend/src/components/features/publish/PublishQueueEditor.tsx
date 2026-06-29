@@ -1,6 +1,7 @@
 "use client";
 
 import type { PublishQueueItem, SocialPlatform } from "@/types/publish";
+import { PlatformPostPreview } from "@/components/features/publish/PlatformPostPreview";
 import { getPlatformLimit, isOverPlatformLimit } from "@/lib/platform-limits";
 import { ConnectedAccountsStrip } from "@/components/features/publish/ConnectedAccountsStrip";
 import { setMockConnectedPlatforms } from "@/lib/mock-publish";
@@ -126,15 +127,19 @@ export function PublishQueueEditor({
                 {item.text.length} / {getPlatformLimit(item.platform)} characters
               </p>
 
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Post preview
+                </p>
+                <PlatformPostPreview
+                  platform={item.platform}
+                  text={item.text}
+                  imageUrl={item.imageUrl}
+                  overLimit={overLimit}
+                />
+              </div>
+
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                {item.imageUrl && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    className="h-14 w-14 rounded-lg border border-violet-200 object-cover"
-                  />
-                )}
                 <label className="text-xs text-slate-600">
                   Schedule
                   <input

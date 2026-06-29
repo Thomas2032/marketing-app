@@ -88,15 +88,15 @@ API docs: http://localhost:8000/docs
 
 ```bash
 cd frontend
-cp ../.env.example .env.local
+npm install
 npm run dev
 ```
 
 App: http://localhost:3000
 
-**Mock mode (no backend):** Set `USE_BACKEND = false` in `frontend/src/lib/constants.ts`. The UI simulates orchestrator turns with staged `tool_calls` and incremental `outputs` in session storage.
+**Mock mode (default, no backend):** Works out of the box — projects, campaigns, and publish flow use `sessionStorage`.
 
-**Live API:** Set `USE_BACKEND = true` and ensure the backend is running on port 8000.
+**Live API:** Copy `frontend/.env.example` to `frontend/.env.local`, set `NEXT_PUBLIC_USE_BACKEND=true`, and ensure the backend is running on port 8000.
 
 ### 4. Optional: queue worker
 

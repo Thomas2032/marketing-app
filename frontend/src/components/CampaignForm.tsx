@@ -83,14 +83,17 @@ export function CampaignForm({ projectId }: CampaignFormProps) {
 
   return (
     <form id="campaign-form" onSubmit={handleSubmit} className="flex flex-1 flex-col">
-      <div className="mb-8">
-        <p className="mb-3 flex items-center gap-2 text-sm text-slate-600">
+      <div className="mb-6">
+        <p className="mb-2 flex items-center gap-2 text-sm text-slate-600">
           <Sparkles className="h-4 w-4 text-violet-600" aria-hidden />
-          What should we create today?
+          New campaign
         </p>
-        <h1 className="font-[family-name:var(--font-space-grotesk)] text-3xl font-semibold tracking-tight text-indigo-950 sm:text-4xl">
+        <h2 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-semibold tracking-tight text-indigo-950 sm:text-3xl">
           Describe your campaign
-        </h1>
+        </h2>
+        <p className="mt-2 text-sm text-slate-600">
+          Tell the orchestrator what to create. Brand DNA from this project is applied automatically.
+        </p>
       </div>
 
       <div

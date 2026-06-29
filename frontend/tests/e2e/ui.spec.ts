@@ -16,6 +16,11 @@ const API = "http://localhost:8000/api/v1";
 // project IDs from mock-projects use "project-{uuid}" prefix
 const PROJECT_ID_RE = /\/projects\/project-[0-9a-f-]+$/;
 
+async function addBrandSource(page: import("@playwright/test").Page, url = "https://example.com") {
+  await page.locator("#brand-source-input").fill(url);
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+}
+
 // ---------------------------------------------------------------------------
 // Landing Page
 // ---------------------------------------------------------------------------
@@ -50,32 +55,51 @@ test.describe("Create Project", () => {
   test("navigating to /projects/new shows the create form", async ({ page }) => {
     await page.goto(`${FRONTEND}/projects/new`);
     await expect(page.locator("#project-name")).toBeVisible();
-    await expect(page.locator("#project-description")).toBeVisible();
+    await expect(page.locator("#brand-source-input")).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toHaveText("Create project");
   });
 
   test("submitting empty name shows validation error", async ({ page }) => {
     await page.goto(`${FRONTEND}/projects/new`);
+    await addBrandSource(page);
     await page.locator('button[type="submit"]').click();
     await expect(page.locator("text=Project name is required")).toBeVisible();
+  });
+
+  test("submitting without brand sources shows validation error", async ({ page }) => {
+    await page.goto(`${FRONTEND}/projects/new`);
+    await page.locator("#project-name").fill("No Sources Project");
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator("text=Add at least one brand source")).toBeVisible();
   });
 
   test("filling in name and submitting redirects to project page", async ({ page }) => {
     await page.goto(`${FRONTEND}/projects/new`);
     await page.locator("#project-name").fill("UI Test Project");
-    await page.locator("#project-description").fill("Created by Playwright");
+    await addBrandSource(page, "https://flowstack.io");
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL(PROJECT_ID_RE, { timeout: 5000 });
+    await page.waitForURL(PROJECT_ID_RE, { timeout: 8000 });
     expect(page.url()).toMatch(PROJECT_ID_RE);
   });
 
   test("project workspace shows project name after creation", async ({ page }) => {
     await page.goto(`${FRONTEND}/projects/new`);
     await page.locator("#project-name").fill("Named Project For Test");
+    await addBrandSource(page);
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL(PROJECT_ID_RE, { timeout: 5000 });
+    await page.waitForURL(PROJECT_ID_RE, { timeout: 8000 });
     await expect(page.locator("h1", { hasText: "Named Project For Test" })).toBeVisible();
+  });
+
+  test("project workspace shows Brand DNA card after creation", async ({ page }) => {
+    await page.goto(`${FRONTEND}/projects/new`);
+    await page.locator("#project-name").fill("Brand DNA Test Project");
+    await addBrandSource(page, "https://acme.com");
+    await page.locator('button[type="submit"]').click();
+    await page.waitForURL(PROJECT_ID_RE, { timeout: 8000 });
+    await expect(page.locator("text=Brand DNA")).toBeVisible();
+    await expect(page.locator("text=Preview — extracted from your sources")).toBeVisible();
   });
 });
 
@@ -88,8 +112,9 @@ test.describe("Project Workspace", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${FRONTEND}/projects/new`);
     await page.locator("#project-name").fill("Workspace Test Project");
+    await addBrandSource(page);
     await page.locator('button[type="submit"]').click();
-    await page.waitForURL(PROJECT_ID_RE, { timeout: 5000 });
+    await page.waitForURL(PROJECT_ID_RE, { timeout: 8000 });
     projectUrl = page.url();
   });
 
@@ -116,6 +141,33 @@ test.describe("Project Workspace", () => {
       (e) => !e.includes("hydration") && !e.includes("ResizeObserver")
     );
     expect(critical).toHaveLength(0);
+  });
+
+  test("publish queue editor shows platform post preview", async ({ page }) => {
+    const projectId = projectUrl.split("/projects/")[1];
+    const queueItem = {
+      id: "queue-test-1",
+      campaignId: "camp-1",
+      campaignTitle: "Test Campaign",
+      outputId: "out-1",
+      platform: "LinkedIn",
+      text: "Launch day is here. Our new line cuts setup time by 40%.",
+      imageUrl: null,
+      createdAt: new Date().toISOString(),
+      scheduledAt: null,
+      status: "draft",
+    };
+
+    await page.goto(`${FRONTEND}/projects/${projectId}/publish`);
+    await page.evaluate(
+      ({ pid, item }) => {
+        sessionStorage.setItem(`mock-publish-queue:${pid}`, JSON.stringify([item]));
+      },
+      { pid: projectId, item: queueItem },
+    );
+    await page.reload();
+    await expect(page.locator("text=Post preview").first()).toBeVisible();
+    await expect(page.getByLabel("LinkedIn post preview")).toBeVisible();
   });
 
   test("back button returns to home", async ({ page }) => {

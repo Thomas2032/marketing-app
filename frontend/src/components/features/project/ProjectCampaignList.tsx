@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { History } from "lucide-react";
 import { ModeIcon, getModeIconLabel } from "@/components/features/campaign/ModeIcon";
 import type { CampaignSummary } from "@/types/campaign";
 import { listMockCampaignSummaries } from "@/lib/mock-campaign";
@@ -10,9 +11,14 @@ import { cn } from "@/lib/utils";
 type ProjectCampaignListProps = {
   projectId: string;
   activeCampaignId?: string;
+  variant?: "default" | "sidebar";
 };
 
-export function ProjectCampaignList({ projectId, activeCampaignId }: ProjectCampaignListProps) {
+export function ProjectCampaignList({
+  projectId,
+  activeCampaignId,
+  variant = "default",
+}: ProjectCampaignListProps) {
   const [campaigns, setCampaigns] = useState<CampaignSummary[]>([]);
 
   useEffect(() => {
@@ -21,12 +27,27 @@ export function ProjectCampaignList({ projectId, activeCampaignId }: ProjectCamp
 
   if (campaigns.length === 0) return null;
 
+  const isSidebar = variant === "sidebar";
+
   return (
-    <section className="mb-8">
-      <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">
-        Runs in this project
-      </p>
-      <ul className="space-y-2">
+    <section
+      className={cn(
+        isSidebar
+          ? "rounded-2xl border border-violet-200 bg-white p-4 shadow-sm"
+          : "mb-8",
+      )}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <History className="h-4 w-4 text-violet-600" aria-hidden />
+        <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Past runs
+        </h2>
+        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">
+          {campaigns.length}
+        </span>
+      </div>
+
+      <ul className={cn("space-y-2", isSidebar && "max-h-64 overflow-y-auto pr-1")}>
         {campaigns.map((campaign) => (
           <li key={campaign.id}>
             <Link
